@@ -1,0 +1,29 @@
+name : DevSecOps Pipeline
+
+on:
+  push:
+    branches:
+      - main
+jobs:
+  build-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Setup Docker build
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build Docker Image
+      run: docker build -t securecart-app
+
+    - name: Run Trivy Vulnerability Scanner
+      uses: aquasecuriy/trivy-actions@master
+      with:
+        image-ref: 'securecart-app'
+        format: 'table'
+        exit code: '1'
+        ignore-unfixed: true
+        vuln-type: 'os,library'
+        serverity: 'CRITICAL,HIGH'
